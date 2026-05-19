@@ -22,9 +22,27 @@
         <section id="shelfList" class="shelf-list"></section>
       </main>
 
+      <main id="calendarScreen" class="screen" aria-label="カレンダー">
+        <h2>カレンダー</h2>
+        <p class="screen-note">今月の歩みを、そっと振り返りましょう。</p>
+
+        <section class="calendar-card" aria-label="月間カレンダー">
+          <div class="calendar-head">
+            <button id="prevMonthBtn" class="month-btn" aria-label="前の月">‹</button>
+            <p id="calendarMonthLabel" class="calendar-month-label"></p>
+            <button id="nextMonthBtn" class="month-btn" aria-label="次の月">›</button>
+          </div>
+          <div class="calendar-weekdays" aria-hidden="true"></div>
+          <div id="calendarGrid" class="calendar-grid"></div>
+        </section>
+
+        <section id="dayDetail" class="day-detail" aria-live="polite"></section>
+      </main>
+
       <nav class="bottom-nav">
         <button data-screen="home" class="nav-btn active">ホーム</button>
         <button data-screen="shelf" class="nav-btn">棚</button>
+        <button data-screen="calendar" class="nav-btn">カレンダー</button>
       </nav>
     </div>
 
