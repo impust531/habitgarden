@@ -15,12 +15,22 @@ saveState();
 const habitList = document.getElementById('habitList');
 const shelfList = document.getElementById('shelfList');
 const template = document.getElementById('habitCardTemplate');
+const calendarGrid = document.getElementById('calendarGrid');
+const calendarMonthLabel = document.getElementById('calendarMonthLabel');
+const dayDetail = document.getElementById('dayDetail');
+const weekdaysContainer = document.querySelector('.calendar-weekdays');
 
+let activeMonth = new Date();
+activeMonth.setDate(1);
+let selectedDayKey = getDayKey(new Date());
+
+setupCalendarWeekdays();
 render();
 
 function render() {
   renderHabits();
   renderShelf();
+  renderCalendar();
 }
 
 function renderHabits() {
@@ -89,6 +99,84 @@ function renderShelf() {
   });
 }
 
+function renderCalendar() {
+  const monthDate = new Date(activeMonth);
+  const year = monthDate.getFullYear();
+  const month = monthDate.getMonth();
+
+  calendarMonthLabel.textContent = `${year}年 ${month + 1}月`;
+  calendarGrid.innerHTML = '';
+
+  const monthStart = new Date(year, month, 1);
+  const gridStart = new Date(monthStart);
+  gridStart.setDate(monthStart.getDate() - monthStart.getDay());
+
+  for (let i = 0; i < 42; i += 1) {
+    const day = new Date(gridStart);
+    day.setDate(gridStart.getDate() + i);
+    const dayKey = getDayKey(day);
+
+    const button = document.createElement('button');
+    button.className = 'calendar-day';
+    if (day.getMonth() !== month) button.classList.add('other-month');
+    if (dayKey === getDayKey(new Date())) button.classList.add('today');
+    if (dayKey === selectedDayKey) button.classList.add('selected');
+
+    button.innerHTML = `<span class="day-num">${day.getDate()}</span><span class="day-indicators"></span>`;
+    fillIndicators(button.querySelector('.day-indicators'), dayKey);
+
+    button.addEventListener('click', () => {
+      selectedDayKey = dayKey;
+      dayDetail.classList.add('fade');
+      setTimeout(() => {
+        renderCalendar();
+        dayDetail.classList.remove('fade');
+      }, 120);
+    });
+
+    calendarGrid.appendChild(button);
+  }
+
+  renderDayDetail();
+}
+
+function fillIndicators(container, dayKey) {
+  const monthKey = dayKey.slice(0, 7);
+  const monthData = state.current[monthKey] || {};
+
+  habits.forEach((habit) => {
+    const days = monthData[habit.id] || [];
+    if (days.includes(dayKey)) {
+      const dot = document.createElement('span');
+      dot.className = `indicator-dot ${habit.id}`;
+      dot.title = `${habit.name} 完了`;
+      container.appendChild(dot);
+    }
+  });
+}
+
+function renderDayDetail() {
+  const date = new Date(`${selectedDayKey}T12:00:00`);
+  const monthKey = selectedDayKey.slice(0, 7);
+  const monthData = state.current[monthKey] || {};
+
+  const completed = habits
+    .filter((habit) => (monthData[habit.id] || []).includes(selectedDayKey))
+    .map((habit) => `${habit.name} 完了`);
+
+  const lines = completed.length ? completed.map((item) => `<p>${item}</p>`).join('') : '<p>ゆっくり休んだ日でした。</p>';
+  dayDetail.innerHTML = `<h3>${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日</h3>${lines}`;
+}
+
+function setupCalendarWeekdays() {
+  ['日', '月', '火', '水', '木', '金', '土'].forEach((day) => {
+    const el = document.createElement('div');
+    el.className = 'calendar-weekday';
+    el.textContent = day;
+    weekdaysContainer.appendChild(el);
+  });
+}
+
 function getPlantIcon(theme, completedDays) {
   const idx = Math.min(4, Math.floor((completedDays / 24) * 5));
   const variants = {
@@ -135,12 +223,24 @@ function saveState() {
   localStorage.setItem(storeKey, JSON.stringify(state));
 }
 
+document.getElementById('prevMonthBtn').addEventListener('click', () => {
+  activeMonth.setMonth(activeMonth.getMonth() - 1);
+  renderCalendar();
+});
+
+document.getElementById('nextMonthBtn').addEventListener('click', () => {
+  activeMonth.setMonth(activeMonth.getMonth() + 1);
+  renderCalendar();
+});
+
 document.querySelectorAll('.nav-btn').forEach((btn) => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.nav-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
-    const isHome = btn.dataset.screen === 'home';
-    document.getElementById('homeScreen').classList.toggle('active', isHome);
-    document.getElementById('shelfScreen').classList.toggle('active', !isHome);
+
+    const screen = btn.dataset.screen;
+    document.getElementById('homeScreen').classList.toggle('active', screen === 'home');
+    document.getElementById('shelfScreen').classList.toggle('active', screen === 'shelf');
+    document.getElementById('calendarScreen').classList.toggle('active', screen === 'calendar');
   });
 });
