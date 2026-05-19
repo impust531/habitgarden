@@ -20,7 +20,7 @@ body {
   min-height: 100dvh;
   display: flex;
   flex-direction: column;
-  padding: 16px 16px 90px;
+  padding: 16px 16px calc(90px + env(safe-area-inset-bottom));
 }
 .topbar h1 {
   margin: 10px 0 18px;
@@ -110,7 +110,7 @@ body {
   width: calc(100% - 32px);
   left: 50%;
   transform: translateX(-50%);
-  bottom: 12px;
+  bottom: calc(12px + env(safe-area-inset-bottom));
   background: #fff;
   border-radius: 16px;
   box-shadow: var(--shadow);
@@ -130,6 +130,27 @@ body {
 .nav-btn.active {
   background: var(--accent-soft);
   color: #3f6e4b;
+}
+
+@media (max-width: 360px) {
+  .app {
+    padding-left: 12px;
+    padding-right: 12px;
+  }
+
+  .bottom-nav {
+    width: calc(100% - 24px);
+  }
+
+  .habit-card {
+    padding: 14px;
+  }
+}
+
+@media (min-width: 768px) {
+  .habit-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
 }
 @keyframes twinkle {
   0% { opacity: 0; transform: scale(0.8); }
