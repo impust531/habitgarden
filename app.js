@@ -5,28 +5,27 @@
 ];
 
 const MAX_GROWTH_DAYS = 30;
-const imageCache = new Map();
 const PLANT_IMAGES = {
   coffeetree: [
-    'images/coffeetree-1.png',
-    'images/coffeetree-2.png',
-    'images/coffeetree-3.png',
-    'images/coffeetree-4.png',
-    'images/coffeetree-5.png',
+    'images/coffeetree-1.webp',
+    'images/coffeetree-2.webp',
+    'images/coffeetree-3.webp',
+    'images/coffeetree-4.webp',
+    'images/coffeetree-5.webp',
   ],
   hawortia: [
-    'images/hawortia-1.png',
-    'images/hawortia-2.png',
-    'images/hawortia-3.png',
-    'images/hawortia-4.png',
-    'images/hawortia-5.png',
+    'images/hawortia-1.webp',
+    'images/hawortia-2.webp',
+    'images/hawortia-3.webp',
+    'images/hawortia-4.webp',
+    'images/hawortia-5.webp',
   ],
   jewelorchid: [
-    'images/jewelorchid-1.png',
-    'images/jewelorchid-2.png',
-    'images/jewelorchid-3.png',
-    'images/jewelorchid-4.png',
-    'images/jewelorchid-5.png',
+    'images/jewelorchid-1.webp',
+    'images/jewelorchid-2.webp',
+    'images/jewelorchid-3.webp',
+    'images/jewelorchid-4.webp',
+    'images/jewelorchid-5.webp',
   ],
 };
 const storeKey = 'habit-garden-v1';
@@ -203,8 +202,8 @@ function renderShelf() {
 
         const plant = document.createElement('img');
         plant.className = 'shelf-plant';
+        plant.src = getPlantImage(habit.plant, count);
         plant.alt = `${habit.name} ${month} の最終形態`;
-        setPlantSource(plant, getPlantImage(habit.plant, count));
         item.appendChild(plant);
 
         const date = document.createElement('div');
@@ -222,28 +221,12 @@ function renderShelf() {
 }
 
 function setPlantImage(image, habit, completedDays) {
+  image.src = getPlantImage(habit.plant, completedDays);
   image.alt = `${habit.name} ${completedDays}/${MAX_GROWTH_DAYS}日`;
-  setPlantSource(image, getPlantImage(habit.plant, completedDays));
 }
 
 function getPlantImage(plant, completedDays) {
   return PLANT_IMAGES[plant][getGrowthStage(completedDays)];
-}
-
-function setPlantSource(image, assetPath) {
-  image.dataset.asset = assetPath;
-  loadPlantDataUrl(assetPath).then((dataUrl) => {
-    if (image.dataset.asset === assetPath) image.src = dataUrl;
-  });
-}
-
-async function loadPlantDataUrl(assetPath) {
-  if (imageCache.has(assetPath)) return imageCache.get(assetPath);
-  const response = await fetch(assetPath);
-  const base64 = (await response.text()).trim();
-  const dataUrl = `data:image/webp;base64,${base64}`;
-  imageCache.set(assetPath, dataUrl);
-  return dataUrl;
 }
 
 function getGrowthStage(completedDays) {
